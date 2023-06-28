@@ -11,6 +11,7 @@ from tortoise.contrib.pydantic import pydantic_model_creator
 
 from models.user import User
 from utils.auth import generate_udid, encode_password, verify_password
+from utils.response import response_msg
 
 UserParams = pydantic_model_creator(User)
 
@@ -31,20 +32,17 @@ class AuthUserRequest(BaseModel):
 async def auth_user(user_params: AuthUserRequest):
     cur_user = await User.get_or_none(username=user_params.username)
     if not cur_user:
-        return {"msg": "用户名或密码错误", "data": None}
+        return response_msg("e", "用户名或密码错误")
 
     if not verify_password(
         user_params.password,
         cur_user.password
     ):
-        return {"msg": "用户名或密码错误", "data": None}
+        return response_msg("e", "用户名或密码错误")
 
-    return {
-        "msg": "登录成功",
-        "data": {
-            "user": cur_user
-        }
-    }
+    return response_msg("s", "登录成功", {
+        "user": cur_user
+    })
 
 @router.post("")
 async def create_user(user_params: CreateUserRequest):
@@ -60,13 +58,12 @@ async def create_user(user_params: CreateUserRequest):
 
         has_user = await User.filter(username=user_params.username)
         if has_user:
-            return {"msg": "用户名已经存在", "data": None}
+            return response_msg("e", "用户名已经存在")
 
         await newUser.save()
-        return {
-            "msg": "创建成功",
-            "data": newUser
-        }
+        return response_msg("s", "创建成功", {
+            newUser
+        })
 
     except Exception as e:
         raise {"msg": str(e), "data": None}
@@ -76,11 +73,8 @@ async def create_user(user_params: CreateUserRequest):
 async def delete_user(uuid: str):
     deleted_count = await User.filter(uuid=uuid).delete()
     if not deleted_count:
-        raise {"msg": "User not found", "data": None}
+        return response_msg("e", "User not found")
 
-    return {
-            "msg": "删除成功",
-            "data": None
-        }
+    return response_msg("s", "删除成功")
 
 
