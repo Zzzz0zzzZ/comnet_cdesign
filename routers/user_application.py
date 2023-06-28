@@ -11,6 +11,7 @@ from pydantic import BaseModel
 from tortoise.contrib.pydantic import pydantic_model_creator
 
 from models.user_application import UserApplication
+from models.user import User
 from utils.response import response_msg
 
 UserApplicationParams = pydantic_model_creator(UserApplication)
@@ -54,6 +55,14 @@ async def get_application(uuid: str = Query(...)):
     # 找出请求
     application_from_me = await UserApplication.filter(uuid_from=uuid)
     application_to_me = await UserApplication.filter(uuid_to=uuid)
+
+    # 查信息
+    for ap_from in application_from_me:
+        ap_from.__dict__["uuid_from"] = await User.get(uuid=ap_from.__dict__["uuid_from"])
+        ap_from.__dict__["uuid_to"] = await User.get(uuid=ap_from.__dict__["uuid_to"])
+    for ap_to in application_to_me:
+        ap_to.__dict__["uuid_from"] = await User.get(uuid=ap_to.__dict__["uuid_from"])
+        ap_to.__dict__["uuid_to"] = await User.get(uuid=ap_to.__dict__["uuid_to"])
 
     return response_msg("s", "查询申请关系成功", data={
         "uuid": uuid,
