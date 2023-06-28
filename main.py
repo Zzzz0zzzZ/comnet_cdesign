@@ -6,6 +6,7 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import RedirectResponse
 
 from routers.user import router as user_router
+from routers.ws import router as ws_router
 from tortoise.contrib.fastapi import register_tortoise
 
 with open("./configs/config.txt", "r") as f:
@@ -33,6 +34,7 @@ app.add_middleware(
 )
 
 app.include_router(user_router, prefix="/user")
+app.include_router(ws_router, prefix="/ws")
 
 # 注册数据库连接
 register_tortoise(
