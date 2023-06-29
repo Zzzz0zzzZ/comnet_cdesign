@@ -34,10 +34,15 @@ class ConnectionManager:
         manager.broadcast(f"用户-{user_connection}-离开")
         print(self.active_connections)
 
-    async def send_personal_message(self, message: str, ws_str: str):
+    async def send_personal_message(self, message: Dict, ws_from: WebSocket):
         # 发送个人消息
-        ws = self.active_connections[ws_str]
-        await ws.send_text(message)
+        try:
+            ws = self.active_connections[message["to"]]
+            await ws.send_text(f"来自{message['from']}的消息:  {message['text']}")
+            await ws_from.send_text(f"已发送新消息: {message}")
+        except Exception as e:
+            await ws_from.send_text(f"对方不在线, 你的消息{message}未发出")
+
 
     async def broadcast(self, message: str):
         # 广播消息
@@ -53,7 +58,7 @@ async def websocket_endpoint(websocket: WebSocket, user: str):
 
     await manager.connect(websocket)
 
-    await manager.broadcast(f"用户{user}进入聊天室")
+    # await manager.broadcast(f"用户{user}进入聊天室")
 
     try:
         while True:
@@ -61,8 +66,8 @@ async def websocket_endpoint(websocket: WebSocket, user: str):
             data = json.loads(data)  # 解析接收到的消息为JSON对象
 
             if data["type"] == "single":
-                await manager.send_personal_message(f"新消息: {data}", data["to"])
-                await manager.send_personal_message(f"已发送新消息: {data}", user)
+                await manager.send_personal_message(data, websocket)
+
             elif data["type"] == "group":
                 pass
             else:
