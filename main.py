@@ -42,7 +42,7 @@ app.include_router(application_router, prefix="/application")
 register_tortoise(
     app,
     db_url=config["db_url"],
-    modules={"models": ["models.user", "models.user_application"]},
+    modules={"models": ["models.user", "models.user_application", "models.user_relationship"]},
     # generate_schemas=True,
 )
 
