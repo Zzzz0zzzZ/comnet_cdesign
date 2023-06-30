@@ -8,6 +8,7 @@ from typing import Dict
 
 from fastapi import APIRouter
 from fastapi import WebSocket, WebSocketDisconnect
+from utils.response import response_ws
 
 router = APIRouter()
 
@@ -31,17 +32,21 @@ class ConnectionManager:
         # 关闭时 移除ws对象
         user_connection = ws.path_params["user"]
         del self.active_connections[user_connection]
-        manager.broadcast(f"用户-{user_connection}-离开")
+        # manager.broadcast(f"用户-{user_connection}-离开")
         print(self.active_connections)
 
     async def send_personal_message(self, message: Dict, ws_from: WebSocket):
         # 发送个人消息
         try:
             ws = self.active_connections[message["to"]]
-            await ws.send_text(f"来自{message['from']}的消息:  {message['text']}")
-            await ws_from.send_text(f"已发送新消息: {message}")
+
+            await ws.send_text(response_ws("c", "新消息", data=message))
+            # await ws.send_text(f"来自{message['from']}的消息:  {message['text']}")
+            await ws_from.send_text(response_ws("s", "已发送新消息", data=message))
+            # await ws_from.send_text(f"已发送新消息: {message}")
         except Exception as e:
-            await ws_from.send_text(f"对方不在线, 你的消息{message}未发出")
+            await ws_from.send_text(response_ws("w", "对方不在线, 你的消息未发出", data=message))
+            # await ws_from.send_text(f"对方不在线, 你的消息{message}未发出")
 
 
     async def broadcast(self, message: str):
@@ -71,8 +76,9 @@ async def websocket_endpoint(websocket: WebSocket, user: str):
             elif data["type"] == "group":
                 pass
             else:
-                await manager.broadcast(f"消息类型不支持")
+                # await manager.broadcast(f"消息类型不支持")
+                pass
 
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-        await manager.broadcast(f"用户-{user}-离开")
+        # await manager.broadcast(f"用户-{user}-离开")
