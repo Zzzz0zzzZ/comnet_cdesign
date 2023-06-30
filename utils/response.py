@@ -3,6 +3,9 @@
 # @Author : 王思哲
 # @File : response.py
 # @Software: PyCharm
+import json
+from typing import Dict
+
 
 def response_msg(
         msg_type: str,
@@ -15,3 +18,14 @@ def response_msg(
         "msg": msg,
         "data": data
     }
+
+def response_ws(
+        msg_type: str,
+        msg: str = None,
+        data: Dict = None
+):
+    return json.dumps({
+        "msg_type": msg_type,
+        "msg": msg,
+        "data": data
+    })
