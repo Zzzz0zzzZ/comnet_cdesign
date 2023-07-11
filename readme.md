@@ -22,6 +22,43 @@ models下放数据模型，routers下放接口及处理逻辑，utils为工具�
 
 <img src="./imgs/ws传输消息数据结构.jpg" alt="ws传输消息数据结构" style="zoom:50%;" />
 
+## 接口请求参数定义
+
+1. post请求
+
+```python
+from pydantic import BaseModel
+
+class CreateUserRequest(BaseModel):
+    username: str
+    password: str
+    avatar: str
+
+@router.post("")
+async def create_user(user_params: CreateUserRequest):
+    pass
+```
+
+2. get请求
+
+> 这种方式以query方式 /xxx/xxx?uuid="xxx"请求
+
+```python
+@router.get("", description="查询用户新关系")
+async def get_application(uuid: str = Query(...)):
+    pass
+```
+
+>  另外有这种方式./xxx/xxx/uuid 请求
+
+```python
+@router.get("/{uuid}", description="查询用户新关系")
+async def get_application(uuid: str):
+    pass
+```
+
+
+
 ### Git提交规范  [type]: [modules] abstract
 
 1. type部分遵从下图
