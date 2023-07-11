@@ -14,6 +14,7 @@ from models.user_application import UserApplication
 from models.user import User
 from models.user_relationship import UserRelationship
 from utils.response import response_msg
+from utils.types import UserRelationApplyStatus
 
 UserApplicationParams = pydantic_model_creator(UserApplication)
 
@@ -33,7 +34,7 @@ async def create_application(apply_request: ApplyRequest):
     has_application = await UserApplication.filter(
         uuid_from=apply_request.uuid_from,
         uuid_to=apply_request.uuid_to
-    ).exclude(apply_status="FAILED").exists()
+    ).exclude(apply_status=UserRelationApplyStatus.PENDING.value).exists()
 
     if has_application:
         return response_msg("e", "好友关系请求中/已经是好友关系")
@@ -43,7 +44,7 @@ async def create_application(apply_request: ApplyRequest):
         uuid_from=apply_request.uuid_from,
         uuid_to=apply_request.uuid_to,
         apply_text=apply_request.apply_text,
-        apply_status="PENDING"
+        apply_status=UserRelationApplyStatus.PENDING.value
     )
 
     await new_application.save()
@@ -84,7 +85,7 @@ async def update_application(up: UpdateRequest):
     ap_info.finish_time = datetime.today()
     await ap_info.save()
     # 添加到relationship表
-    if ap_info.apply_status == "SUCCESS":
+    if ap_info.apply_status == UserRelationApplyStatus.SUCCESS.value:
         await UserRelationship(
             uuid1 = ap_info.uuid_from,
             uuid2 = ap_info.uuid_to

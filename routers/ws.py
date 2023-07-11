@@ -9,6 +9,8 @@ from typing import Dict
 from fastapi import APIRouter
 from fastapi import WebSocket, WebSocketDisconnect
 from utils.response import response_ws
+from models.chat_msg import ChatMsg
+from utils.types import ChatType
 
 router = APIRouter()
 
@@ -37,16 +39,17 @@ class ConnectionManager:
 
     async def send_personal_message(self, message: Dict, ws_from: WebSocket):
         # 发送个人消息
-        try:
+        # 如果存在连接，且在线，ws发消息
+        if message['to'] in self.active_connections.keys():
             ws = self.active_connections[message["to"]]
 
             await ws.send_text(response_ws("c", "新消息", data=message))
-            # await ws.send_text(f"来自{message['from']}的消息:  {message['text']}")
             await ws_from.send_text(response_ws("s", "已发送新消息", data=message))
-            # await ws_from.send_text(f"已发送新消息: {message}")
-        except Exception as e:
+        # 如果不存在、未登录，则存数据库
+        else:
             await ws_from.send_text(response_ws("w", "对方不在线, 你的消息未发出", data=message))
-            # await ws_from.send_text(f"对方不在线, 你的消息{message}未发出")
+            # # 保存示例
+            await ChatMsg(chat_type=message['type'], uuid_from=message['from'], id_to=message['to'], msg_type=message['msg_type'], content=message['text'], time=message['time']).save()
 
 
     async def broadcast(self, message: str):
@@ -70,10 +73,10 @@ async def websocket_endpoint(websocket: WebSocket, user: str):
             data = await websocket.receive_text()
             data = json.loads(data)  # 解析接收到的消息为JSON对象
 
-            if data["type"] == "single":
+            if data["type"] == ChatType.SINGLE.value:
                 await manager.send_personal_message(data, websocket)
 
-            elif data["type"] == "group":
+            elif data["type"] == ChatType.GROUP.value:
                 pass
             else:
                 # await manager.broadcast(f"消息类型不支持")
