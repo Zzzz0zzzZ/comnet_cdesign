@@ -44,7 +44,12 @@ app.include_router(relationship_router, prefix="/relationship")
 register_tortoise(
     app,
     db_url=config["db_url"],
-    modules={"models": ["models.user", "models.user_application", "models.user_relationship"]},
+    modules={"models": [
+        "models.user",
+        "models.user_application",
+        "models.user_relationship",
+        "models.chat_msg"
+    ]},
     # generate_schemas=True,
 )
 
