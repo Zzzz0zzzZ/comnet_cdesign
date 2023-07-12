@@ -50,11 +50,32 @@ async def create_group(group_params: CreateGroup):
 
 @router.delete("/{gid}")
 async def delete_group(gid: str):
-    delete_members = await UserGroup.filter(gid=gid).delete()
-    delete_group = await Group.filter(gid=gid).delete()
-    if not delete_members or not delete_group:
-        return response_msg("e", "删除失败")
-    return response_msg("s", "删除成功")
+    try:
+        delete_members = await UserGroup.filter(gid=gid).delete()
+        delete_group = await Group.filter(gid=gid).delete()
+        if not delete_members or not delete_group:
+            return response_msg("e", "删除失败")
+        return response_msg("s", "删除成功")
+    except Exception as e:
+        raise {"msg": str(e), "data": None}
 
 
-
+@router.get("")
+async def get_groups(uuid: str):
+    try:
+        groups_info = []
+        groups = await UserGroup.filter(uuid=uuid)
+        for group in groups:
+            gid = group.__dict__['gid']
+            members = await UserGroup.filter(gid=gid)
+            members_info = []
+            for member in members:
+                user = await User.get(uuid=member.__dict__['uuid'])
+                members_info.append(user)
+            groups_info.append({
+                "gid": gid,
+                "members": members_info
+            })
+        return response_msg("s", "获取成功", groups_info)
+    except Exception as e:
+        raise {"msg": str(e), "data": None}
