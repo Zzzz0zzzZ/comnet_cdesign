@@ -9,6 +9,7 @@ from routers.user import router as user_router
 from routers.ws import router as ws_router
 from routers.user_application import router as application_router
 from routers.user_relationship import router as relationship_router
+from routers.group import router as group_router
 from tortoise.contrib.fastapi import register_tortoise
 
 with open("./configs/config.txt", "r") as f:
@@ -39,6 +40,7 @@ app.include_router(user_router, prefix="/user")
 app.include_router(ws_router, prefix="/ws")
 app.include_router(application_router, prefix="/application")
 app.include_router(relationship_router, prefix="/relationship")
+app.include_router(group_router, prefix="/chatgroup")
 
 # 注册数据库连接
 register_tortoise(
@@ -49,7 +51,7 @@ register_tortoise(
         "models.user_application",
         "models.user_relationship",
         "models.chat_msg",
-        "models.chatgroup_table"
+        "models.group"
     ]},
     # generate_schemas=True,
 )
@@ -63,6 +65,6 @@ async def main_to_docs():
 
 if __name__ == "__main__":
     # local
-    uvicorn.run(app, port=8889, log_config="./configs/uvicorn_config.json", debug=True)
+    uvicorn.run(app, port=8889, log_config="configs/uvicorn_config.json", debug=True)
     # online
     # uvicorn.run(app, host='0.0.0.0', port=7957, log_config="./configs/uvicorn_config.json", debug=True)
