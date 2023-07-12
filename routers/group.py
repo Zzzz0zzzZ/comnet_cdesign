@@ -60,7 +60,7 @@ async def delete_group(gid: str):
         raise {"msg": str(e), "data": None}
 
 
-@router.get("")
+@router.post("/{uuid}")
 async def get_groups(uuid: str):
     try:
         groups_info = []
@@ -76,6 +76,9 @@ async def get_groups(uuid: str):
                 "gid": gid,
                 "members": members_info
             })
-        return response_msg("s", "获取成功", groups_info)
+        return response_msg("s", "获取成功", {
+            "uuid":uuid,
+            "groups":groups_info
+        })
     except Exception as e:
         raise {"msg": str(e), "data": None}
