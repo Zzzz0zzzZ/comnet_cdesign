@@ -52,7 +52,8 @@ register_tortoise(
         "models.user_relationship",
         "models.chat_msg",
         "models.group",
-        "models.user_group"
+        "models.user_group",
+        "models.msg_group"
     ]},
     # generate_schemas=True,
 )
