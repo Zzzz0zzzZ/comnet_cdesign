@@ -23,7 +23,7 @@ class CreateGroup(BaseModel):
     uuid_to: list
 
 
-@router.post("/create")
+@router.post("")
 async def create_group(group_params: CreateGroup):
     try:
         gid = uuid4()
@@ -46,3 +46,15 @@ async def create_group(group_params: CreateGroup):
         })
     except Exception as e:
         raise {"msg": str(e), "data": None}
+
+
+@router.delete("/{gid}")
+async def delete_group(gid: str):
+    delete_members = await UserGroup.filter(gid=gid).delete()
+    delete_group = await Group.filter(gid=gid).delete()
+    if not delete_members or not delete_group:
+        return response_msg("e", "删除失败")
+    return response_msg("s", "删除成功")
+
+
+

@@ -40,7 +40,7 @@ app.include_router(user_router, prefix="/user")
 app.include_router(ws_router, prefix="/ws")
 app.include_router(application_router, prefix="/application")
 app.include_router(relationship_router, prefix="/relationship")
-app.include_router(group_router, prefix="/chatgroup")
+app.include_router(group_router, prefix="/group")
 
 # 注册数据库连接
 register_tortoise(
@@ -51,7 +51,8 @@ register_tortoise(
         "models.user_application",
         "models.user_relationship",
         "models.chat_msg",
-        "models.group"
+        "models.group",
+        "models.user_group"
     ]},
     # generate_schemas=True,
 )
