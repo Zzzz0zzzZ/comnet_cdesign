@@ -14,6 +14,8 @@ from utils.response import response_ws
 from models.chat_msg import ChatMsg
 from utils.types import ChatType
 from utils.response import response_msg
+from utils.pull_message import pull_single_message, pull_group_message
+
 router = APIRouter()
 
 
@@ -99,42 +101,8 @@ async def websocket_endpoint(websocket: WebSocket, user: str):
 
 @router.post("/pull/{uuid}")
 async def pull_message(uuid: str):
-    single_msg = []
-    group_msg = []
     try:
-        messages = await ChatMsg.filter(id_to=uuid)
-        id_from_single = set()
-        id_from_group = set()
-
-        for message in messages:
-            if message.__dict__['chat_type'] == ChatType.SINGLE.value:
-                id_from_single.add(message.__dict__['uuid_from'])
-            elif message.__dict__['chat_type'] == ChatType.GROUP.value:
-                pass
-            else:
-                pass
-
-        for uuid_from in id_from_single:
-            data = []
-            messages = await ChatMsg.filter(uuid_from=uuid_from, id_to=uuid)
-            user_from = await User.get(uuid=uuid_from)
-            user_to = await User.get(uuid=uuid)
-            for message in messages:
-                data.append({
-                    "from": uuid_from,
-                    "to": uuid,
-                    "time": message.__dict__['time'],
-                    "type": message.__dict__['chat_type'],
-                    "text": message.__dict__['content'],
-                    "msg_type": message.__dict__['msg_type']
-                })
-            data = sorted(data, key=lambda x: x['time'])
-            single_msg.append(
-                {"user_from": user_from,
-                 "user_to": user_to,
-                 "data": data
-                 }
-            )
+        single_msg = await pull_single_message(uuid)
         return_info = {
             "single_msg": single_msg
         }
