@@ -5,8 +5,11 @@
 # @Software: PyCharm
 import json
 from typing import Dict
+from uuid import uuid4
+
 from models.group import Group
 from models.user import User
+from models.msg_group import MsgGroup
 from models.user_group import UserGroup
 from fastapi import APIRouter
 from fastapi import WebSocket, WebSocketDisconnect
@@ -52,18 +55,26 @@ class ConnectionManager:
             await ws_from.send_text(response_ws("s", "已发送新消息", data=message))
         # 如果不存在、未登录，则存数据库
         else:
+            mid = uuid4()
             await ws_from.send_text(response_ws("w", "对方不在线, 你的消息未发出", data=message))
             # # 保存示例
             await ChatMsg(chat_type=message['type'], uuid_from=message['from'], id_to=message['to'],
-                          msg_type=message['msg_type'], content=message['text'], time=message['time']).save()
+                          msg_type=message['msg_type'], content=message['text'], time=message['time'], mid=mid).save()
+            return mid
 
     async def send_group_message(self, message: Dict, ws_from: WebSocket):
-        members = await UserGroup.filter(gid=message['to'])
+        gid = message['to']
+        members = await UserGroup.filter(gid=gid)
         for member in members:
             if member.__dict__['uuid'] != message['from']:
                 personal_message = message.copy()
                 personal_message['to'] = member.__dict__['uuid']
-                await self.send_personal_message(personal_message, ws_from)
+                mid = await self.send_personal_message(personal_message, ws_from)
+                newMsgGroup = MsgGroup(
+                    gid=gid,
+                    mid=mid
+                )
+                await newMsgGroup.save()
 
     async def broadcast(self, message: str):
         # 广播消息
