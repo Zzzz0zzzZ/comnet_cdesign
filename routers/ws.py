@@ -5,7 +5,8 @@
 # @Software: PyCharm
 import json
 from typing import Dict
-
+from models.group import Group
+from models.user_group import UserGroup
 from fastapi import APIRouter
 from fastapi import WebSocket, WebSocketDisconnect
 from utils.response import response_ws
@@ -13,6 +14,7 @@ from models.chat_msg import ChatMsg
 from utils.types import ChatType
 
 router = APIRouter()
+
 
 class ConnectionManager:
     def __init__(self):
@@ -49,7 +51,16 @@ class ConnectionManager:
         else:
             await ws_from.send_text(response_ws("w", "对方不在线, 你的消息未发出", data=message))
             # # 保存示例
-            await ChatMsg(chat_type=message['type'], uuid_from=message['from'], id_to=message['to'], msg_type=message['msg_type'], content=message['text'], time=message['time']).save()
+            await ChatMsg(chat_type=message['type'], uuid_from=message['from'], id_to=message['to'],
+                          msg_type=message['msg_type'], content=message['text'], time=message['time']).save()
+
+    async def send_group_message(self, message: Dict, ws_from: WebSocket):
+
+        members = await UserGroup.filter(gid=message['to'])
+        for member in members:
+            personal_message = message.copy()
+            personal_message['to'] = member.__dict__['uuid']
+            await self.send_personal_message(personal_message, ws_from)
 
 
     async def broadcast(self, message: str):
@@ -63,7 +74,6 @@ manager = ConnectionManager()
 
 @router.websocket("/{user}")
 async def websocket_endpoint(websocket: WebSocket, user: str):
-
     await manager.connect(websocket)
 
     # await manager.broadcast(f"用户{user}进入聊天室")
@@ -77,7 +87,7 @@ async def websocket_endpoint(websocket: WebSocket, user: str):
                 await manager.send_personal_message(data, websocket)
 
             elif data["type"] == ChatType.GROUP.value:
-                pass
+                await manager.send_group_message(data, websocket)
             else:
                 # await manager.broadcast(f"消息类型不支持")
                 pass
