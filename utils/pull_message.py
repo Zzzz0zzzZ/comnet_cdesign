@@ -3,6 +3,7 @@ from typing import Dict
 from models.group import Group
 from models.user import User
 from models.user_group import UserGroup
+from models.msg_group import MsgGroup
 from fastapi import APIRouter
 from fastapi import WebSocket, WebSocketDisconnect
 from utils.response import response_ws
@@ -13,7 +14,7 @@ from utils.response import response_msg
 
 async def pull_single_message(uuid: str):
     single_messages = []
-    messages = await ChatMsg.filter(id_to=uuid,chat_type=ChatType.SINGLE.value)
+    messages = await ChatMsg.filter(id_to=uuid, chat_type=ChatType.SINGLE.value)
     id_from_single = set()
     for message in messages:
         id_from_single.add(message.__dict__['uuid_from'])
@@ -24,14 +25,15 @@ async def pull_single_message(uuid: str):
         user_from = await User.get(uuid=uuid_from)
         user_to = await User.get(uuid=uuid)
         for message in messages:
-            data.append({
-                "from": uuid_from,
-                "to": uuid,
-                "time": message.__dict__['time'],
-                "type": message.__dict__['chat_type'],
-                "text": message.__dict__['content'],
-                "msg_type": message.__dict__['msg_type']
-            })
+            if message.__dict__['chat_type'] == ChatType.SINGLE.value:
+                data.append({
+                    "from": uuid_from,
+                    "to": uuid,
+                    "time": message.__dict__['time'],
+                    "type": message.__dict__['chat_type'],
+                    "text": message.__dict__['content'],
+                    "msg_type": message.__dict__['msg_type']
+                })
         data = sorted(data, key=lambda x: x['time'])
         single_messages.append(
             {"user_from": user_from,
@@ -43,4 +45,33 @@ async def pull_single_message(uuid: str):
 
 
 async def pull_group_message(uuid: str):
-
+    group_messages = []
+    all_groups = await UserGroup.filter(uuid=uuid)  # 该用户所在的所有群组
+    all_gid = set()
+    for group in all_groups:
+        all_gid.add(group.__dict__['gid'])
+    data = []
+    for gid in all_gid:
+        group_to = await Group.get(gid=gid)
+        msgGroups = await MsgGroup.filter(gid=gid)
+        if len(msgGroups) != 0:
+            for msgGroup in msgGroups:
+                mid = msgGroup.__dict__['mid']
+                message = await ChatMsg.get(mid=mid)
+                uuid_from = message.__dict__['uuid_from']
+                user_from = await User.get(uuid=uuid_from)
+                data.append({
+                    "from": uuid_from,
+                    "to": gid,
+                    "time": message.__dict__['time'],
+                    "type": message.__dict__['chat_type'],
+                    "text": message.__dict__['content'],
+                    "msg_type": message.__dict__['msg_type'],
+                    "user_from": user_from
+                })
+            data = sorted(data, key=lambda x: x['time'])
+            group_messages.append({
+                "group": group_to,
+                "data": data
+            })
+    return group_messages
