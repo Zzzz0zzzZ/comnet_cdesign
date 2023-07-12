@@ -58,10 +58,10 @@ class ConnectionManager:
 
         members = await UserGroup.filter(gid=message['to'])
         for member in members:
-            personal_message = message.copy()
-            personal_message['to'] = member.__dict__['uuid']
-            await self.send_personal_message(personal_message, ws_from)
-
+            if member.__dict__['uuid'] != message['from']:
+                personal_message = message.copy()
+                personal_message['to'] = member.__dict__['uuid']
+                await self.send_personal_message(personal_message, ws_from)
 
     async def broadcast(self, message: str):
         # 广播消息

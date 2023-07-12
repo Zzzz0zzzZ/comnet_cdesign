@@ -77,8 +77,8 @@ async def get_groups(uuid: str):
                 "members": members_info
             })
         return response_msg("s", "获取成功", {
-            "uuid":uuid,
-            "groups":groups_info
+            "uuid": uuid,
+            "groups": groups_info
         })
     except Exception as e:
         raise {"msg": str(e), "data": None}
