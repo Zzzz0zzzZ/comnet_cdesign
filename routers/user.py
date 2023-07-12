@@ -7,13 +7,13 @@ from uuid import uuid4
 
 from fastapi import APIRouter
 from pydantic import BaseModel
-from tortoise.contrib.pydantic import pydantic_model_creator
+# from tortoise.contrib.pydantic import pydantic_model_creator
 
 from models.user import User
 from utils.auth import generate_udid, encode_password, verify_password
 from utils.response import response_msg
 
-UserParams = pydantic_model_creator(User)
+# UserParams = pydantic_model_creator(User)
 
 router = APIRouter()
 

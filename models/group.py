@@ -11,7 +11,6 @@ class Group(Model):
     id = fields.IntField(pk=True)
     gid = fields.CharField(max_length=255, null=True)
     gname = fields.CharField(max_length=255, null=True)
-    uuid = fields.CharField(max_length=255, null=True)
 
     class Meta:
         table = 'group'

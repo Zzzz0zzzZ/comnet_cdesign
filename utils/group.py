@@ -2,7 +2,7 @@ from models.user_group import UserGroup
 from utils.response import response_msg
 
 
-def add_group_members(uuid_to: list, gid: str):
+async def add_group_members(uuid_to: list, gid: str):
     try:
         for uuid in uuid_to:
             newUserGroup = UserGroup(

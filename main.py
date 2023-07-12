@@ -66,6 +66,6 @@ async def main_to_docs():
 
 if __name__ == "__main__":
     # local
-    uvicorn.run(app, port=8889, log_config="configs/uvicorn_config.json", debug=True)
+    uvicorn.run(app, port=8889, log_config="./configs/uvicorn_config.json")
     # online
-    # uvicorn.run(app, host='0.0.0.0', port=7957, log_config="./configs/uvicorn_config.json", debug=True)
+    # uvicorn.run(app, host='0.0.0.0', port=7957, log_config="configs/uvicorn_config.json", debug=True)

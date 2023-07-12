@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from fastapi import APIRouter
 from pydantic import BaseModel
-from tortoise.contrib.pydantic import pydantic_model_creator
+# from tortoise.contrib.pydantic import pydantic_model_creator
 
 from models.group import Group
 from models.user_group import UserGroup
@@ -11,8 +11,8 @@ from utils.auth import generate_udid, encode_password, verify_password
 from utils.response import response_msg
 from utils.group import *
 
-UserParams = pydantic_model_creator(Group)
-UserGroupParams = pydantic_model_creator(UserGroup)
+# UserParams = pydantic_model_creator(Group)
+# UserGroupParams = pydantic_model_creator(UserGroup)
 
 router = APIRouter()
 
@@ -32,7 +32,7 @@ async def create_group(group_params: CreateGroup):
             gname=group_params.gname
         )
         await newGroup.save()
-        add_group_members(group_params.uuid_to, str(gid))
+        await add_group_members(group_params.uuid_to, str(gid))
         users = []
         for uuid in group_params.uuid_to:
             user = await User.get(uuid=uuid)

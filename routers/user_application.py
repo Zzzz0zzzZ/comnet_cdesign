@@ -8,7 +8,7 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Query
 from pydantic import BaseModel
-from tortoise.contrib.pydantic import pydantic_model_creator
+# from tortoise.contrib.pydantic import pydantic_model_creator
 
 from models.user_application import UserApplication
 from models.user import User
@@ -16,7 +16,7 @@ from models.user_relationship import UserRelationship
 from utils.response import response_msg
 from utils.types import UserRelationApplyStatus
 
-UserApplicationParams = pydantic_model_creator(UserApplication)
+# UserApplicationParams = pydantic_model_creator(UserApplication)
 
 router = APIRouter()
 
