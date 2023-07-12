@@ -13,11 +13,10 @@ from utils.response import response_msg
 
 async def pull_single_message(uuid: str):
     single_messages = []
-    messages = await ChatMsg.filter(id_to=uuid)
+    messages = await ChatMsg.filter(id_to=uuid,chat_type=ChatType.SINGLE.value)
     id_from_single = set()
     for message in messages:
-        if message.__dict__['chat_type'] == ChatType.SINGLE.value:
-            id_from_single.add(message.__dict__['uuid_from'])
+        id_from_single.add(message.__dict__['uuid_from'])
 
     for uuid_from in id_from_single:
         data = []
@@ -44,4 +43,4 @@ async def pull_single_message(uuid: str):
 
 
 async def pull_group_message(uuid: str):
-    pass
+
