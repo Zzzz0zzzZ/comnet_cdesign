@@ -34,6 +34,7 @@ async def pull_single_message(uuid: str):
                     "text": message.content,
                     "msg_type": message.msg_type
                 })
+            await message.delete()
         data = sorted(data, key=lambda x: x['time'])
         single_messages.append(
             {"user_from": user_from,
