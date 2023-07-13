@@ -110,16 +110,4 @@ async def websocket_endpoint(websocket: WebSocket, user: str):
         # await manager.broadcast(f"用户-{user}-离开")
 
 
-@router.post("/pull/{uuid}")
-async def pull_message(uuid: str):
-    try:
-        single_msg = await pull_single_message(uuid)
-        group_msg = await pull_group_message(uuid)
-        return_info = {
-            "single_msg": single_msg,
-            "group_msg": group_msg
-        }
-        return response_msg("s", "获取成功", return_info)
 
-    except Exception as e:
-        raise {"msg": str(e), "data": None}

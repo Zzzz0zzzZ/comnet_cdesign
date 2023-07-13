@@ -6,6 +6,7 @@
 import hashlib
 from uuid import uuid4, UUID
 
+
 def encode_password(p: str):
     hash_object = hashlib.sha256(p.encode('utf-8'))
     return hash_object.hexdigest()
@@ -13,6 +14,7 @@ def encode_password(p: str):
 
 def verify_password(op: str, ep: str):
     return encode_password(op) == ep
+
 
 def generate_udid(uuid: UUID):
     uuid = str(uuid)

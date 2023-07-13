@@ -9,6 +9,7 @@ from routers.user import router as user_router
 from routers.ws import router as ws_router
 from routers.user_application import router as application_router
 from routers.user_relationship import router as relationship_router
+from routers.chat import router as chat_router
 from routers.group import router as group_router
 from tortoise.contrib.fastapi import register_tortoise
 
@@ -41,6 +42,7 @@ app.include_router(ws_router, prefix="/ws")
 app.include_router(application_router, prefix="/application")
 app.include_router(relationship_router, prefix="/relationship")
 app.include_router(group_router, prefix="/group")
+app.include_router(chat_router, prefix="/chat")
 
 # 注册数据库连接
 register_tortoise(
