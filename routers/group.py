@@ -66,11 +66,11 @@ async def get_groups(uuid: str):
         groups_info = []
         groups = await UserGroup.filter(uuid=uuid)
         for group in groups:
-            gid = group.__dict__['gid']
+            gid = group.gid
             members = await UserGroup.filter(gid=gid)
             members_info = []
             for member in members:
-                user = await User.get(uuid=member.__dict__['uuid'])
+                user = await User.get(uuid=member.uuid)
                 members_info.append(user)
             groups_info.append({
                 "gid": gid,

@@ -66,9 +66,9 @@ class ConnectionManager:
         gid = message['to']
         members = await UserGroup.filter(gid=gid)
         for member in members:
-            if member.__dict__['uuid'] != message['from']:
+            if member.uuid != message['from']:
                 personal_message = message.copy()
-                personal_message['to'] = member.__dict__['uuid']
+                personal_message['to'] = member.uuid
                 mid = await self.send_personal_message(personal_message, ws_from)
                 newMsgGroup = MsgGroup(
                     gid=gid,
