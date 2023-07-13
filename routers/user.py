@@ -45,6 +45,12 @@ class UpdateTime(BaseModel):
     time: str
 
 
+class UpdatePassword(BaseModel):
+    uuid: str
+    old_password: str
+    new_password: str
+
+
 @router.post("/auth")
 async def auth_user(user_params: AuthUserRequest):
     cur_user = await User.get_or_none(username=user_params.username)
@@ -137,6 +143,27 @@ async def update_user_logout_time(user_params: UpdateTime):
         user.logout_time = datetime.strptime(user_params.time, "%Y-%m-%d %H:%M:%S")
         await user.save()
         return response_msg("s", "登出时间更改成功", user)
+
+    except Exception as e:
+        raise {"msg": str(e), "data": None}
+
+
+@router.post("/update/password")
+async def update_user_logout_time(user_params: UpdatePassword):
+    try:
+        user = await User.get(uuid=user_params.uuid)
+        if not verify_password(
+                user_params.old_password,
+                user.password
+        ):
+            return response_msg("e", "原密码错误")
+
+        if user_params.new_password == user_params.old_password:
+            return response_msg("e", "新密码与旧密码相同")
+
+        user.password = encode_password(user_params.new_password)
+        await user.save()
+        return response_msg("s", "密码更改成功", user)
 
     except Exception as e:
         raise {"msg": str(e), "data": None}
