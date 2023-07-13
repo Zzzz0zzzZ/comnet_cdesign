@@ -21,7 +21,7 @@ async def pull_single_message(uuid: str):
 
     for uuid_from in id_from_single:
         data = []
-        messages = await ChatMsg.filter(uuid_from=uuid_from, id_to=uuid)
+        messages = await ChatMsg.filter(uuid_from=uuid_from, id_to=uuid, chat_type=ChatType.SINGLE.value)
         user_from = await User.get(uuid=uuid_from)
         user_to = await User.get(uuid=uuid)
         for message in messages:
@@ -70,6 +70,8 @@ async def pull_group_message(uuid: str):
                     "msg_type": message.msg_type,
                     "user_from": user_from
                 })
+                await message.delete()
+                await msgGroup.delete()
             data = sorted(data, key=lambda x: x['time'])
             group_messages.append({
                 "group": group_to,
