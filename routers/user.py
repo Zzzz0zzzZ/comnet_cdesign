@@ -34,6 +34,11 @@ class UpdateUserPhoto(BaseModel):
     url: str
 
 
+class UpdateUserLoginStatus(BaseModel):
+    uuid: str
+    is_login: int
+
+
 @router.post("/auth")
 async def auth_user(user_params: AuthUserRequest):
     cur_user = await User.get_or_none(username=user_params.username)
@@ -91,5 +96,16 @@ async def update_user_photo(user_params: UpdateUserPhoto):
         user.avatar = user_params.url
         await user.save()
         return response_msg("s", "头像上传成功", user)
+    except Exception as e:
+        raise {"msg": str(e), "data": None}
+
+
+@router.post("/status")
+async def update_user_login_status(user_params: UpdateUserLoginStatus):
+    try:
+        user = await User.get(uuid=user_params.uuid)
+        user.is_login = user_params.is_login
+        await user.save()
+        return response_msg("s", "登录状态更改成功", user)
     except Exception as e:
         raise {"msg": str(e), "data": None}
