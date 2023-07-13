@@ -70,8 +70,9 @@ async def pull_group_message(uuid: str):
                     "msg_type": message.msg_type,
                     "user_from": user_from
                 })
-                await message.delete()
                 await msgGroup.delete()
+                await message.delete()
+
             data = sorted(data, key=lambda x: x['time'])
             group_messages.append({
                 "group": group_to,
