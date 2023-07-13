@@ -3,6 +3,7 @@
 # @Author : 王思哲
 # @File : user.py
 # @Software: PyCharm
+from datetime import datetime
 from uuid import uuid4
 
 from fastapi import APIRouter
@@ -37,6 +38,11 @@ class UpdateUserPhoto(BaseModel):
 class UpdateUserLoginStatus(BaseModel):
     uuid: str
     is_login: int
+
+
+class UpdateTime(BaseModel):
+    uuid: str
+    time: str
 
 
 @router.post("/auth")
@@ -89,7 +95,7 @@ async def delete_user(uuid: str):
     return response_msg("s", "删除成功")
 
 
-@router.post("/photo")
+@router.post("/update/photo")
 async def update_user_photo(user_params: UpdateUserPhoto):
     try:
         user = await User.get(uuid=user_params.uuid)
@@ -100,12 +106,37 @@ async def update_user_photo(user_params: UpdateUserPhoto):
         raise {"msg": str(e), "data": None}
 
 
-@router.post("/status")
+@router.post("/update/status")
 async def update_user_login_status(user_params: UpdateUserLoginStatus):
     try:
         user = await User.get(uuid=user_params.uuid)
         user.is_login = user_params.is_login
         await user.save()
         return response_msg("s", "登录状态更改成功", user)
+
+    except Exception as e:
+        raise {"msg": str(e), "data": None}
+
+
+@router.post("/update/login")
+async def update_user_login_time(user_params: UpdateTime):
+    try:
+        user = await User.get(uuid=user_params.uuid)
+        user.login_time = datetime.strptime(user_params.time, "%Y-%m-%d %H:%M:%S")
+        await user.save()
+        return response_msg("s", "登录时间更改成功", user)
+
+    except Exception as e:
+        raise {"msg": str(e), "data": None}
+
+
+@router.post("/update/logout")
+async def update_user_logout_time(user_params: UpdateTime):
+    try:
+        user = await User.get(uuid=user_params.uuid)
+        user.logout_time = datetime.strptime(user_params.time, "%Y-%m-%d %H:%M:%S")
+        await user.save()
+        return response_msg("s", "登出时间更改成功", user)
+
     except Exception as e:
         raise {"msg": str(e), "data": None}
