@@ -28,6 +28,12 @@ class AuthUserRequest(BaseModel):
     username: str
     password: str
 
+
+class UpdateUserPhoto(BaseModel):
+    uuid: str
+    url: str
+
+
 @router.post("/auth")
 async def auth_user(user_params: AuthUserRequest):
     cur_user = await User.get_or_none(username=user_params.username)
@@ -35,8 +41,8 @@ async def auth_user(user_params: AuthUserRequest):
         return response_msg("e", "用户名或密码错误")
 
     if not verify_password(
-        user_params.password,
-        cur_user.password
+            user_params.password,
+            cur_user.password
     ):
         return response_msg("e", "用户名或密码错误")
 
@@ -44,16 +50,16 @@ async def auth_user(user_params: AuthUserRequest):
         "user": cur_user
     })
 
+
 @router.post("")
 async def create_user(user_params: CreateUserRequest):
-
     try:
         uuid = uuid4()
         newUser = User(
             uuid=uuid,
             username=user_params.username,
             password=encode_password(user_params.password),
-            udid = generate_udid(uuid)
+            udid=generate_udid(uuid)
         )
 
         has_user = await User.filter(username=user_params.username)
@@ -78,3 +84,12 @@ async def delete_user(uuid: str):
     return response_msg("s", "删除成功")
 
 
+@router.post("/photo")
+async def update_user_photo(user_params: UpdateUserPhoto):
+    try:
+        user = await User.get(uuid=user_params.uuid)
+        user.avatar = user_params.url
+        await user.save()
+        return response_msg("s", "头像上传成功", user)
+    except Exception as e:
+        raise {"msg": str(e), "data": None}
