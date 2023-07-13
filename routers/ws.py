@@ -53,6 +53,7 @@ class ConnectionManager:
 
             await ws.send_text(response_ws("c", "新消息", data=message))
             await ws_from.send_text(response_ws("s", "已发送新消息", data=message))
+            return 0
         # 如果不存在、未登录，则存数据库
         else:
             mid = uuid4()
@@ -70,11 +71,12 @@ class ConnectionManager:
                 personal_message = message.copy()
                 personal_message['to'] = member.uuid
                 mid = await self.send_personal_message(personal_message, ws_from)
-                newMsgGroup = MsgGroup(
-                    gid=gid,
-                    mid=mid
-                )
-                await newMsgGroup.save()
+                if mid != 0:
+                    newMsgGroup = MsgGroup(
+                        gid=gid,
+                        mid=mid
+                    )
+                    await newMsgGroup.save()
 
     async def broadcast(self, message: str):
         # 广播消息
