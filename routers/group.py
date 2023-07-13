@@ -32,6 +32,7 @@ async def create_group(group_params: CreateGroup):
             gname=group_params.gname
         )
         await newGroup.save()
+        group_params.uuid_to.append(group_params.uuid_from)
         await add_group_members(group_params.uuid_to, str(gid))
         users = []
         for uuid in group_params.uuid_to:
