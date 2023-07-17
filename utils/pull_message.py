@@ -1,15 +1,9 @@
-import json
-from typing import Dict
 from models.group import Group
 from models.user import User
 from models.user_group import UserGroup
 from models.msg_group import MsgGroup
-from fastapi import APIRouter
-from fastapi import WebSocket, WebSocketDisconnect
-from utils.response import response_ws
 from models.chat_msg import ChatMsg
 from utils.types import ChatType
-from utils.response import response_msg
 
 
 async def pull_single_message(uuid: str):
@@ -58,7 +52,9 @@ async def pull_group_message(uuid: str):
         if len(msgGroups) != 0:
             for msgGroup in msgGroups:
                 mid = msgGroup.mid
-                message = await ChatMsg.get(mid=mid)
+                message = await ChatMsg.get_or_none(mid=mid, id_to=uuid)
+                if message is None:
+                    continue
                 uuid_from = message.uuid_from
                 user_from = await User.get(uuid=uuid_from)
                 data.append({
